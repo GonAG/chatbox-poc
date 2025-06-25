@@ -13,8 +13,16 @@ class Message extends Model
     protected $fillable = [
         'conversation_id',
         'content',
+        'attachment_path',
         'is_outgoing',
     ];
+
+    protected $appends = ['attachment_url'];
+
+    public function getAttachmentUrlAttribute(): ?string
+    {
+        return $this->attachment_path ? asset('storage/'.$this->attachment_path) : null;
+    }
 
     public function conversation(): BelongsTo
     {

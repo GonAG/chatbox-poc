@@ -24,4 +24,27 @@ class ConversationController extends Controller
 
         return response()->json($conversation);
     }
+
+    public function storeMessage(Request $request, Conversation $conversation)
+    {
+        abort_unless($conversation->user_id === $request->user()->id, 403);
+
+        $validated = $request->validate([
+            'content' => 'nullable|string',
+            'attachment' => 'nullable|file|mimes:pdf,jpg,jpeg,png,mp4,quicktime,mpeg',
+        ]);
+
+        $path = null;
+        if ($request->hasFile('attachment')) {
+            $path = $request->file('attachment')->store('attachments', 'public');
+        }
+
+        $message = $conversation->messages()->create([
+            'content' => $validated['content'] ?? '',
+            'attachment_path' => $path,
+            'is_outgoing' => true,
+        ]);
+
+        return response()->json($message, 201);
+    }
 }

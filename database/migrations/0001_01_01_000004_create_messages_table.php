@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('conversation_id')->constrained()->cascadeOnDelete();
             $table->text('content');
+            $table->string('attachment_path')->nullable();
             $table->boolean('is_outgoing')->default(false);
             $table->timestamps();
         });

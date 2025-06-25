@@ -18,6 +18,7 @@ class MessageFactory extends Factory
         return [
             'conversation_id' => Conversation::factory(),
             'content' => fake()->sentence(),
+            'attachment_path' => null,
             'is_outgoing' => fake()->boolean(),
         ];
     }
