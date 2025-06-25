@@ -3,6 +3,7 @@ import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
 import { useState } from 'react';
+import Attachment from '@/components/chat/attachment';
 
 interface Conversation {
     id: number;
@@ -89,17 +90,14 @@ export default function ChatPage({ conversations: initialConversations }: Props)
                                                 : 'bg-neutral-200 dark:bg-neutral-700')
                                         }
                                     >
-                                        {m.content && <p>{m.content}</p>}
                                         {m.attachment_url && (
-                                            <a
-                                                href={m.attachment_url}
-                                                target="_blank"
-                                                rel="noreferrer"
-                                                className="underline block mt-1"
-                                            >
-                                                View attachment
-                                            </a>
+                                            <div className="mb-2">
+                                                <Attachment
+                                                    attachment_url={m.attachment_url}
+                                                />
+                                            </div>
                                         )}
+                                        {m.content && <p>{m.content}</p>}
                                     </div>
                                     {m.created_at && (
                                         <div className="text-xs text-neutral-500 mt-1">
