@@ -15,6 +15,7 @@ interface Message {
     content: string;
     is_outgoing: boolean;
     attachment_url?: string | null;
+    created_at?: string | null;
 }
 
 interface Props {
@@ -76,7 +77,7 @@ export default function ChatPage({ conversations: initialConversations }: Props)
                     ))}
                 </div>
                 <div className="flex-1 flex flex-col">
-                    <div className="flex-1 p-4 overflow-y-auto space-y-2">
+                    <div className="flex-1 p-4 overflow-y-auto space-y-4">
                         {selected &&
                             messages.map((m) => (
                                 <div key={m.id} className={m.is_outgoing ? 'text-right' : ''}>
@@ -100,6 +101,11 @@ export default function ChatPage({ conversations: initialConversations }: Props)
                                             </a>
                                         )}
                                     </div>
+                                    {m.created_at && (
+                                        <div className="text-xs text-neutral-500 mt-1">
+                                            {new Date(m.created_at).toLocaleDateString()} {new Date(m.created_at).toLocaleTimeString()}
+                                        </div>
+                                    )}
                                 </div>
                             ))}
                     </div>
