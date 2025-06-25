@@ -26,3 +26,15 @@ test('api routes are auth protected', function () {
     $this->actingAs($user)->getJson('/api/conversations/'.$conversation->id)->assertOk();
 });
 
+test('authenticated users can send messages', function () {
+    $user = User::factory()->create();
+    $conversation = Conversation::factory()->for($user)->create();
+
+    $this->actingAs($user)
+        ->postJson('/api/conversations/'.$conversation->id.'/messages', [
+            'content' => 'Hello',
+        ])
+        ->assertCreated()
+        ->assertJsonPath('content', 'Hello');
+});
+
