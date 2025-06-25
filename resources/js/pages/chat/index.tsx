@@ -78,7 +78,7 @@ export default function ChatPage({ conversations: initialConversations }: Props)
                     ))}
                 </div>
                 <div className="flex-1 flex flex-col">
-                    <div className="flex-1 p-4 overflow-y-auto space-y-4">
+                    <div className="flex-1 p-4 max-h-[600px] overflow-y-auto space-y-4">
                         {selected &&
                             messages.map((m) => (
                                 <div key={m.id} className={m.is_outgoing ? 'text-right' : ''}>
