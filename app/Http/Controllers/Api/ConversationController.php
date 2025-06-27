@@ -53,12 +53,18 @@ class ConversationController extends Controller
         ]);
 
         $path = null;
+        $media = [];
         if ($request->hasFile('attachment')) {
             $path = $request->file('attachment')->store('attachments', 'public');
+            $media[] = asset('storage/'.$path);
         }
 
-        if (! empty($validated['content'])) {
-            $twilio->sendMessage($conversation->phone_number, $validated['content']);
+        if (! empty($validated['content']) || $media !== []) {
+            $twilio->sendMessage(
+                $conversation->phone_number,
+                $validated['content'] ?? '',
+                $media
+            );
         }
 
         $data = MessageData::create(

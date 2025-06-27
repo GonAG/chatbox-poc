@@ -3,6 +3,8 @@
 use App\\Models\\Conversation;
 use App\\Models\\User;
 use App\\Services\\TwilioService;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\\Foundation\\Testing\\RefreshDatabase;
 
 uses(RefreshDatabase::class);
@@ -52,5 +54,24 @@ test('authenticated users can send messages', function () {
         ])
         ->assertCreated()
         ->assertJsonPath('content', 'Hello');
+});
+
+test('authenticated users can send messages with attachments', function () {
+    Storage::fake('public');
+
+    $user = User::factory()->create();
+    $conversation = Conversation::factory()->for($user)->create();
+
+    $twilio = mock(TwilioService::class);
+    $twilio->shouldReceive('sendMessage')->once();
+
+    $file = UploadedFile::fake()->image('photo.jpg');
+
+    $this->actingAs($user)
+        ->post('/api/conversations/'.$conversation->id.'/messages', [
+            'attachment' => $file,
+        ], ['Accept' => 'application/json'])
+        ->assertCreated()
+        ->assertJsonPath('attachment_path', 'attachments/'.$file->hashName());
 });
 
