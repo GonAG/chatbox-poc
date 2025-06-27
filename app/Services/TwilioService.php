@@ -16,14 +16,20 @@ class TwilioService
         );
     }
 
-    public function sendMessage($to, $message)
+    public function sendMessage(string $to, string $message = '', array $mediaUrls = []): mixed
     {
-        return $this->client->messages->create(
-            $to,
-            [
-                'from' => config('services.twilio.sms.from'),
-                'body' => $message
-            ]
-        );
+        $options = [
+            'from' => config('services.twilio.sms.from'),
+        ];
+
+        if ($message !== '') {
+            $options['body'] = $message;
+        }
+
+        if ($mediaUrls !== []) {
+            $options['mediaUrl'] = $mediaUrls;
+        }
+
+        return $this->client->messages->create($to, $options);
     }
 }
