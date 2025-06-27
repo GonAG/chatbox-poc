@@ -11,4 +11,5 @@ Route::middleware('auth')->group(function () {
     Route::post('conversations/{conversation}/messages', [ConversationController::class, 'storeMessage']);
 });
 
-Route::post('webhooks/twilio', TwilioWebhookController::class);
+Route::post('webhooks/twilio/message', [TwilioWebhookController::class, 'messageWebhook'])
+    ->name('webhooks.twilio.message');

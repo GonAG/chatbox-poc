@@ -15,6 +15,7 @@ interface Message {
     id: number;
     content: string;
     is_outgoing: boolean;
+    files?: { url: string; type: string }[] | null;
     attachment_url?: string | null;
     created_at?: string | null;
 }
@@ -121,13 +122,12 @@ export default function ChatPage({ conversations: initialConversations }: Props)
                                                 : 'bg-neutral-200 dark:bg-neutral-700')
                                         }
                                     >
-                                        {m.attachment_url && (
-                                            <div className="mb-2">
-                                                <Attachment
-                                                    attachment_url={m.attachment_url}
-                                                />
-                                            </div>
-                                        )}
+                                        {m.files && m.files.map((file, index) => (
+                                            <Attachment
+                                                key={index}
+                                                attachment_url={file.url}
+                                            />
+                                        ))}
                                         {m.content && <p>{m.content}</p>}
                                     </div>
                                     {m.created_at && (

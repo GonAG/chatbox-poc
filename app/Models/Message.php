@@ -17,11 +17,22 @@ class Message extends Model
         'is_outgoing',
     ];
 
-    protected $appends = ['attachment_url'];
+    protected $appends = ['files'];
 
-    public function getAttachmentUrlAttribute(): ?string
+    public function getFilesAttribute(): array
     {
-        return $this->attachment_path ? asset('storage/'.$this->attachment_path) : null;
+        $files = [];
+        if ($this->attachment_path) {
+            $media = json_decode($this->attachment_path, true);
+
+            if (is_array($media) && array_key_exists('media', $media)) {
+                foreach ($media['media'] as $file) {
+                    $files[] = $file;
+                }
+            }
+        }
+
+        return $files;
     }
 
     public function conversation(): BelongsTo

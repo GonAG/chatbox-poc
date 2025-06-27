@@ -3,16 +3,18 @@
 namespace App\Http\Controllers\Webhooks;
 
 use App\DTO\MessageData;
+use App\Helpers\FileManagement;
 use App\Http\Controllers\Controller;
 use App\Models\Conversation;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class TwilioWebhookController extends Controller
 {
-    public function __invoke(Request $request)
+    public function messageWebhook(Request $request)
     {
         $validated = $request->validate([
             'From' => 'required|string',
@@ -31,34 +33,53 @@ class TwilioWebhookController extends Controller
             ]
         );
 
-        $attachmentPath = null;
-        $numMedia = (int) ($validated['NumMedia'] ?? 0);
-        if ($numMedia > 0) {
-            $url = $request->input('MediaUrl0');
-            if ($url) {
-                $extension = pathinfo(parse_url($url, PHP_URL_PATH), PATHINFO_EXTENSION) ?: 'jpg';
-                try {
-                    $response = Http::get($url);
+        $mediaData = null;
+
+        if (array_key_exists('NumMedia', $validated) && $validated['NumMedia'] > 0) {
+            Log::info("SMS: {$conversation->id} has media content: " . $validated['NumMedia']);
+            $mediaData = ['media' => []];
+            try {
+                for ($i=0; $i < $validated['NumMedia']; $i++) {
+                    $mediaUrl = $request->input("MediaUrl{$i}");
+                    $mediaType = $request->input("MediaContentType{$i}");
+                    Log::info("SMS: Media URL {$i}: {$mediaUrl}, Type: {$mediaType}");
+                    $fileExtension = FileManagement::mime2ext($mediaType);
+                    $mediaFilename = basename($mediaUrl) . '.' . $fileExtension;
+
+                    // Download the media file
+                    $response = Http::withBasicAuth(config('services.twilio.sid'), config('services.twilio.token'))->get($mediaUrl);
                     if ($response->successful()) {
-                        $filename = 'attachments/' . uniqid() . '.' . $extension;
-                        Storage::disk('public')->put($filename, $response->body());
-                        $attachmentPath = $filename;
+                        // Save in public disk
+                        Storage::disk('public')->put("/attachments/{$mediaFilename}", $response->body());
+                        $attachmentPath = "attachments/{$mediaFilename}";
+                        $mediaData['media'][] = [
+                            'url' => Storage::url($attachmentPath),
+                            'type' => $mediaType,
+                        ];
+                    } else {
+                        Log::error("SMS: Failed to download media file from {$mediaUrl}");
                     }
-                } catch (\Throwable $th) {
-                    // Ignore download failures
                 }
+            } catch (\Throwable $th) {
+                Log::error("SMS: Error saving media content: {$th->getMessage()}");
             }
         }
 
         $data = MessageData::create(
             $conversation->id,
             $body,
-            $attachmentPath,
+            $mediaData ? json_encode($mediaData) : null,
             false
         );
 
-        $message = $conversation->messages()->create($data->toArray());
+        $conversation->messages()->create($data->toArray());
 
-        return response()->json($message, 201);
+        // Return XML
+        return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+                <Response>
+                    <Message>
+                        <Body>Message received</Body>
+                    </Message>
+                </Response>";
     }
 }
