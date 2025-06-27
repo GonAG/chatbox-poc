@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\ConversationController;
+use App\Http\Controllers\Webhooks\TwilioWebhookController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth')->group(function () {
@@ -9,3 +10,6 @@ Route::middleware('auth')->group(function () {
     Route::get('conversations/{conversation}', [ConversationController::class, 'show']);
     Route::post('conversations/{conversation}/messages', [ConversationController::class, 'storeMessage']);
 });
+
+Route::post('webhooks/twilio/message', [TwilioWebhookController::class, 'messageWebhook'])
+    ->name('webhooks.twilio.message');
