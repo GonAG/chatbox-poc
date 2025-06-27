@@ -2,6 +2,7 @@
 
 use App\\Models\\Conversation;
 use App\\Models\\User;
+use App\\Services\\TwilioService;
 use Illuminate\\Foundation\\Testing\\RefreshDatabase;
 
 uses(RefreshDatabase::class);
@@ -26,9 +27,24 @@ test('api routes are auth protected', function () {
     $this->actingAs($user)->getJson('/api/conversations/'.$conversation->id)->assertOk();
 });
 
+test('users can create conversations', function () {
+    $user = User::factory()->create();
+
+    $this->actingAs($user)
+        ->postJson('/api/conversations', [
+            'phone_number' => '+1234567890',
+            'name' => 'Test User',
+        ])
+        ->assertCreated()
+        ->assertJsonPath('phone_number', '+1234567890');
+});
+
 test('authenticated users can send messages', function () {
     $user = User::factory()->create();
     $conversation = Conversation::factory()->for($user)->create();
+
+    $twilio = mock(TwilioService::class);
+    $twilio->shouldReceive('sendMessage')->once();
 
     $this->actingAs($user)
         ->postJson('/api/conversations/'.$conversation->id.'/messages', [

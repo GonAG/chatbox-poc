@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\DTO\MessageData;
 use App\Http\Controllers\Controller;
 use App\Models\Conversation;
+use App\Services\TwilioService;
 use Illuminate\Http\Request;
 
 class ConversationController extends Controller
@@ -25,7 +27,23 @@ class ConversationController extends Controller
         return response()->json($conversation);
     }
 
-    public function storeMessage(Request $request, Conversation $conversation)
+    public function store(Request $request)
+    {
+        $data = $request->validate([
+            'phone_number' => 'required|string',
+            'name' => 'nullable|string',
+        ]);
+
+        $conversation = Conversation::create([
+            'user_id' => $request->user()->id,
+            'phone_number' => $data['phone_number'],
+            'name' => $data['name'] ?? null,
+        ]);
+
+        return response()->json($conversation, 201);
+    }
+
+    public function storeMessage(Request $request, Conversation $conversation, TwilioService $twilio)
     {
         abort_unless($conversation->user_id === $request->user()->id, 403);
 
@@ -39,11 +57,18 @@ class ConversationController extends Controller
             $path = $request->file('attachment')->store('attachments', 'public');
         }
 
-        $message = $conversation->messages()->create([
-            'content' => $validated['content'] ?? '',
-            'attachment_path' => $path,
-            'is_outgoing' => true,
-        ]);
+        if (! empty($validated['content'])) {
+            $twilio->sendMessage($conversation->phone_number, $validated['content']);
+        }
+
+        $data = MessageData::create(
+            $conversation->id,
+            $validated['content'] ?? '',
+            $path,
+            true,
+        );
+
+        $message = $conversation->messages()->create($data->toArray());
 
         return response()->json($message, 201);
     }

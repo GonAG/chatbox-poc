@@ -28,17 +28,28 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function ChatPage({ conversations: initialConversations }: Props) {
-    const [conversations] = useState(initialConversations);
+    const [conversations, setConversations] = useState(initialConversations);
     const [selected, setSelected] = useState<Conversation | null>(null);
     const [messages, setMessages] = useState<Message[]>([]);
     const [content, setContent] = useState('');
     const [attachment, setAttachment] = useState<File | null>(null);
+    const [phoneNumber, setPhoneNumber] = useState('');
+    const [name, setName] = useState('');
 
     const loadMessages = (conversation: Conversation) => {
         setSelected(conversation);
         api.get(`/api/conversations/${conversation.id}`).then((r) => {
             setMessages(r.data.messages || []);
         });
+    };
+
+    const createConversation = () => {
+        api.post('/api/conversations', { phone_number: phoneNumber, name })
+            .then((r) => {
+                setConversations((c) => [...c, r.data]);
+                setPhoneNumber('');
+                setName('');
+            });
     };
 
     const sendMessage = () => {
@@ -61,7 +72,27 @@ export default function ChatPage({ conversations: initialConversations }: Props)
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Chat" />
             <div className="flex h-full">
-                <div className="w-60 border-r">
+                <div className="w-60 border-r space-y-4 p-2">
+                    <div className="space-y-2">
+                        <input
+                            className="w-full border rounded-md p-1"
+                            placeholder="Phone number"
+                            value={phoneNumber}
+                            onChange={(e) => setPhoneNumber(e.target.value)}
+                        />
+                        <input
+                            className="w-full border rounded-md p-1"
+                            placeholder="Name"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                        />
+                        <button
+                            onClick={createConversation}
+                            className="w-full rounded-md bg-primary px-2 py-1 text-primary-foreground"
+                        >
+                            Create
+                        </button>
+                    </div>
                     {conversations.map((conv) => (
                         <button
                             key={conv.id}
