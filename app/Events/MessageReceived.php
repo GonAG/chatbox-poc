@@ -22,9 +22,10 @@ class MessageReceived implements ShouldBroadcast
     /**
      * Create a new event instance.
      */
-    public function __construct()
+    public function __construct(Conversation $conversation, Message $message)
     {
-        //
+        $this->conversation = $conversation;
+        $this->message = $message;
     }
 
     /**

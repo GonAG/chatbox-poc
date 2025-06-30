@@ -78,6 +78,8 @@ class TwilioWebhookController extends Controller
         // Broadcast the message received event
         event(new MessageReceived($conversation, $message));
 
+        Log::info("SMS: Message received from {$from} in conversation {$conversation->id}");
+
         // Return XML
         return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
                 <Response></Response>";

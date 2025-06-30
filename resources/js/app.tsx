@@ -8,6 +8,14 @@ import { configureEcho } from '@laravel/echo-react';
 
 configureEcho({
     broadcaster: 'pusher',
+    key: import.meta.env.VITE_PUSHER_APP_KEY || '',
+    cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER || 'mt1',
+    wsHost: import.meta.env.VITE_PUSHER_HOST || '127.0.0.0',
+    wsPort: import.meta.env.VITE_PUSHER_PORT ? parseInt(import.meta.env.VITE_PUSHER_PORT, 10) : 6001,
+    wssPort: import.meta.env.VITE_PUSHER_PORT ? parseInt(import.meta.env.VITE_PUSHER_PORT, 10) : 6001,
+    forceTLS: import.meta.env.VITE_PUSHER_SCHEME === 'https',
+    disableStats: true,
+    enabledTransports: ['ws', 'wss'],
 });
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
