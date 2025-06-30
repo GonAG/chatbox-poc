@@ -41,7 +41,7 @@ export default function ChatPage({ conversations: initialConversations }: Props)
     // Listen for incoming messages when a conversation is clicked
     useEcho(
         selected ? `conversations.${selected.id}` : '',
-        'MessageReceived',
+        "MessageReceived",
         (e) => {
             console.log(e);
         },
