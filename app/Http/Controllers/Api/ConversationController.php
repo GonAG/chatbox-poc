@@ -52,24 +52,36 @@ class ConversationController extends Controller
             'attachment' => 'nullable|file|mimes:pdf,jpg,jpeg,png,mp4,quicktime,mpeg',
         ]);
 
-        $path = null;
-        if ($request->hasFile('attachment')) {
-            $path = $request->file('attachment')->store('attachments', 'public');
+        try {
+            $path = null;
+            $media = [];
+            if ($request->hasFile('attachment')) {
+                $path = $request->file('attachment')->store('attachments', 'public');
+                $media[] = asset('storage/'.$path);
+            }
+
+            if (! empty($validated['content']) || $media !== []) {
+                $twilio->sendMessage(
+                    $conversation->phone_number,
+                    $validated['content'] ?? '',
+                    $media
+                );
+            }
+
+            $data = MessageData::create(
+                $conversation->id,
+                $validated['content'] ?? '',
+                $path,
+                true,
+            );
+
+            $message = $conversation->messages()->create($data->toArray());
+
+            return response()->json($message, 201);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'error' => 'Failed to send message: '.$th->getMessage(),
+            ], 500);
         }
-
-        if (! empty($validated['content'])) {
-            $twilio->sendMessage($conversation->phone_number, $validated['content']);
-        }
-
-        $data = MessageData::create(
-            $conversation->id,
-            $validated['content'] ?? '',
-            $path,
-            true,
-        );
-
-        $message = $conversation->messages()->create($data->toArray());
-
-        return response()->json($message, 201);
     }
 }
