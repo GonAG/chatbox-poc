@@ -4,14 +4,7 @@ import { createInertiaApp } from '@inertiajs/react';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { createRoot } from 'react-dom/client';
 import { initializeTheme } from './hooks/use-appearance';
-import { configureEcho } from '@laravel/echo-react';
-
-configureEcho({
-    broadcaster: 'pusher',
-    key: import.meta.env.VITE_PUSHER_APP_KEY || '',
-    cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER || 'us1',
-    forceTLS: import.meta.env.VITE_PUSHER_SCHEME === 'https',
-});
+import './lib/echo';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
