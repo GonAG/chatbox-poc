@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Webhooks;
 
 use App\DTO\MessageData;
+use App\Events\MessageReceived;
 use App\Helpers\FileManagement;
 use App\Http\Controllers\Controller;
 use App\Models\Conversation;
@@ -72,14 +73,13 @@ class TwilioWebhookController extends Controller
             false
         );
 
-        $conversation->messages()->create($data->toArray());
+        $message = $conversation->messages()->create($data->toArray());
+
+        // Broadcast the message received event
+        event(new MessageReceived($conversation, $message));
 
         // Return XML
         return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
-                <Response>
-                    <Message>
-                        <Body>Message received</Body>
-                    </Message>
-                </Response>";
+                <Response></Response>";
     }
 }

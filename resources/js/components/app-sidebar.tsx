@@ -9,11 +9,6 @@ import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
     {
-        title: 'Dashboard',
-        href: '/dashboard',
-        icon: LayoutGrid,
-    },
-    {
         title: 'Chat',
         href: '/chat',
         icon: MessageCircle,
