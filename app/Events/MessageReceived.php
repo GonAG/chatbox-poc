@@ -22,9 +22,10 @@ class MessageReceived implements ShouldBroadcast
     /**
      * Create a new event instance.
      */
-    public function __construct()
+    public function __construct(Conversation $conversation, Message $message)
     {
-        //
+        $this->conversation = $conversation;
+        $this->message = $message;
     }
 
     /**
@@ -35,7 +36,7 @@ class MessageReceived implements ShouldBroadcast
     public function broadcastOn(): array
     {
         return [
-            new PrivateChannel('private-conversations.'.$this->conversation->id),
+            new PrivateChannel('conversations.'.$this->conversation->id),
         ];
     }
 }
