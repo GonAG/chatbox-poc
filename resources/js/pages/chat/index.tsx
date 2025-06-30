@@ -45,11 +45,18 @@ export default function ChatPage({ conversations: initialConversations }: Props)
         const channelName = `conversations.${selected.id}`;
         const channel = echo.private(channelName);
 
-        const handler = (e: unknown) => {
-            console.log(e);
+        const handler = (e: { conversation: Conversation, message: Message }) => {
+            if (e.conversation.id !== selected.id) return;
+
+            setMessages((prevMessages) => [...prevMessages, e.message]);
+
+            const messageContainer = document.querySelector('.message-container');
+            if (messageContainer) {
+                messageContainer.scrollTop = messageContainer.scrollHeight;
+            }
         };
 
-        channel.listen('MessageReceived', handler);
+        channel.listen('.MessageReceived', handler);
 
         return () => {
             channel.stopListening('MessageReceived');
