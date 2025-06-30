@@ -3,7 +3,8 @@ import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
 import { useState } from 'react';
-import Attachment from '@/components/chat/attachment';
+import { useEcho } from '@laravel/echo-react';
+import Message from './message';
 
 interface Conversation {
     id: number;
@@ -36,6 +37,17 @@ export default function ChatPage({ conversations: initialConversations }: Props)
     const [attachment, setAttachment] = useState<File | null>(null);
     const [phoneNumber, setPhoneNumber] = useState('');
     const [name, setName] = useState('');
+
+    // Listen for incoming messages when a conversation is clicked
+    useEcho(
+        selected ? `conversations.${selected.id}` : '',
+        'MessageReceived',
+        (e) => {
+            console.log(e);
+        },
+    );
+
+    console.log('selected', selected);
 
     const loadMessages = (conversation: Conversation) => {
         setSelected(conversation);
@@ -113,29 +125,7 @@ export default function ChatPage({ conversations: initialConversations }: Props)
                     <div className="flex-1 p-4 max-h-[600px] overflow-y-auto space-y-4">
                         {selected &&
                             messages.map((m) => (
-                                <div key={m.id} className={m.is_outgoing ? 'text-right' : ''}>
-                                    <div
-                                        className={
-                                            'inline-block max-w-xs rounded-xl px-3 py-2 ' +
-                                            (m.is_outgoing
-                                                ? 'bg-primary text-primary-foreground'
-                                                : 'bg-neutral-200 dark:bg-neutral-700')
-                                        }
-                                    >
-                                        {m.files && m.files.map((file, index) => (
-                                            <Attachment
-                                                key={index}
-                                                attachment_url={file.url}
-                                            />
-                                        ))}
-                                        {m.content && <p>{m.content}</p>}
-                                    </div>
-                                    {m.created_at && (
-                                        <div className="text-xs text-neutral-500 mt-1">
-                                            {new Date(m.created_at).toLocaleDateString()} {new Date(m.created_at).toLocaleTimeString()}
-                                        </div>
-                                    )}
-                                </div>
+                                <Message key={m.id} message={m} />
                             ))}
                     </div>
                     {selected && (
