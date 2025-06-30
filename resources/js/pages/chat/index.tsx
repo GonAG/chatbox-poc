@@ -2,8 +2,8 @@ import api from '@/lib/api';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
-import { useState } from 'react';
-import { useEcho } from '@laravel/echo-react';
+import { useState, useEffect } from 'react';
+import echo from '@/lib/echo';
 import Message from './message';
 
 interface Conversation {
@@ -39,13 +39,23 @@ export default function ChatPage({ conversations: initialConversations }: Props)
     const [name, setName] = useState('');
 
     // Listen for incoming messages when a conversation is clicked
-    useEcho(
-        selected ? `conversations.${selected.id}` : '',
-        "MessageReceived",
-        (e) => {
+    useEffect(() => {
+        if (!selected) return;
+
+        const channelName = `conversations.${selected.id}`;
+        const channel = echo.private(channelName);
+
+        const handler = (e: unknown) => {
             console.log(e);
-        },
-    );
+        };
+
+        channel.listen('MessageReceived', handler);
+
+        return () => {
+            channel.stopListening('MessageReceived');
+            echo.leave(channelName);
+        };
+    }, [selected]);
 
     console.log('selected', selected);
 
