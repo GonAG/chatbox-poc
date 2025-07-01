@@ -8,6 +8,7 @@ use App\Helpers\FileManagement;
 use App\Http\Controllers\Controller;
 use App\Models\Conversation;
 use App\Models\User;
+use App\Services\TwilioService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -77,6 +78,35 @@ class TwilioWebhookController extends Controller
 
         // Broadcast the message received event
         event(new MessageReceived($conversation, $message));
+
+        $keywords = ['appointment', 'schedule', 'book', 'meeting', 'calendly'];
+
+        if (in_array(strtolower($body), $keywords)) {
+            try {
+                Log::info("SMS: Detected keywords in message body: {$body}");
+                $calendlyLink = config('app.calendly_link', 'https://calendly.com/gonzalog');
+                $responseMessage = "Thanks for your message, you can book a time with me here: {$calendlyLink}";
+
+                $outboundMessage = MessageData::create(
+                    $conversation->id,
+                    $responseMessage,
+                    null,
+                    true
+                );
+
+                app(TwilioService::class)->sendMessage(
+                    $from,
+                    $responseMessage
+                );
+
+                $outboundMessage = $conversation->messages()->create($outboundMessage->toArray());
+
+                // Broadcast the outbound message
+                event(new MessageReceived($conversation, $outboundMessage));
+            } catch (\Throwable $th) {
+                Log::error("SMS: Error sending Calendly link: {$th->getMessage()}");
+            }
+        }
 
         // Return XML
         return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
