@@ -5,6 +5,7 @@ import { Head } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
 import echo from '@/lib/echo';
 import Message from './message';
+import { Icon } from '@/components/icon';
 
 interface Conversation {
     id: number;
@@ -127,7 +128,7 @@ export default function ChatPage({ conversations: initialConversations }: Props)
                         <button
                             key={conv.id}
                             onClick={() => loadMessages(conv)}
-                            className="block w-full p-2 text-left hover:bg-neutral-100 dark:hover:bg-neutral-800"
+                            className={`block w-full p-2 text-left hover:bg-neutral-100 dark:hover:bg-neutral-800 ${selected?.id === conv.id ? 'bg-neutral-200 dark:bg-neutral-700' : ''}`}
                         >
                             <div className="font-medium">
                                 {conv.name ?? conv.phone_number}
@@ -153,20 +154,23 @@ export default function ChatPage({ conversations: initialConversations }: Props)
                                 value={content}
                                 onChange={(e) => setContent(e.target.value)}
                             />
-                            <input
-                                type="file"
-                                onChange={(e) =>
-                                    setAttachment(e.target.files ? e.target.files[0] : null)
-                                }
-                                accept=".pdf,.jpg,.jpeg,.png,video/*"
-                            />
-                            <div>
-                                <button
-                                    onClick={sendMessage}
-                                    className="mt-2 rounded-md bg-primary px-4 py-2 text-primary-foreground"
-                                >
-                                    Send
-                                </button>
+                            <div className="flex justify-between items-baseline">
+                                <input
+                                    type="file"
+                                    className="border rounded-md p-2 bg-secondary"
+                                    onChange={(e) =>
+                                        setAttachment(e.target.files ? e.target.files[0] : null)
+                                    }
+                                    accept=".pdf,.jpg,.jpeg,.png,video/*"
+                                />
+                                <div>
+                                    <button
+                                        onClick={sendMessage}
+                                        className="mt-2 rounded-md bg-primary px-4 py-2 text-primary-foreground"
+                                    >
+                                        Send
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     )}
