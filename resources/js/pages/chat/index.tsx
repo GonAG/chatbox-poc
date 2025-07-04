@@ -70,7 +70,7 @@ export default function ChatPage({ conversations: initialConversations }: Props)
     const loadMessages = (conversation: Conversation) => {
         setSelected(conversation);
         api.get(`/api/conversations/${conversation.id}`).then((r) => {
-            setMessages(r.data.messages || []);
+            setMessages(r.data.conversation.messages || []);
         });
     };
 
