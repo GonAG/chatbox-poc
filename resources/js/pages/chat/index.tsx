@@ -5,7 +5,6 @@ import { Head } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
 import echo from '@/lib/echo';
 import Message from './message';
-import { Icon } from '@/components/icon';
 
 interface Conversation {
     id: number;
