@@ -30,7 +30,7 @@ export default function Message({ message }: MessageProps) {
                 ))}
                 {message.attachment_path && (
                     <Attachment
-                        attachment_url={message.attachment_path}
+                        attachment_url={`storage/${message.attachment_path}`}
                     />
                 )}
                 {message.content && <p>{message.content}</p>}
