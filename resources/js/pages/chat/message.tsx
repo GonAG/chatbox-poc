@@ -7,6 +7,7 @@ interface MessageProps {
         is_outgoing: boolean;
         files?: { url: string; type: string }[] | null;
         created_at?: string | null;
+        attachment_path?: string | null;
     };
 };
 
@@ -27,6 +28,11 @@ export default function Message({ message }: MessageProps) {
                         attachment_url={file.url}
                     />
                 ))}
+                {message.attachment_path && (
+                    <Attachment
+                        attachment_url={message.attachment_path}
+                    />
+                )}
                 {message.content && <p>{message.content}</p>}
             </div>
             {message.created_at && (
