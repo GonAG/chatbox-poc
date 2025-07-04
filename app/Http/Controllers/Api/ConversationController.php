@@ -78,10 +78,11 @@ class ConversationController extends Controller
             $message = $conversation->messages()->create($data->toArray());
 
             return response()->json($message, 201);
-        } catch (\Throwable $th) {
-            return response()->json([
-                'error' => 'Failed to send message: '.$th->getMessage() . ' at ' . $th->getFile() . ':' . $th->getLine(),
-            ], 500);
+        } catch (\Exception $ex) {
+            dd($ex);
+            // return response()->json([
+            //     'error' => 'Failed to send message: '.$th->getMessage() . ' at ' . $th->getFile() . ':' . $th->getLine(),
+            // ], 500);
         }
     }
 }
