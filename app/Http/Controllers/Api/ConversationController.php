@@ -80,7 +80,7 @@ class ConversationController extends Controller
             return response()->json($message, 201);
         } catch (\Throwable $th) {
             return response()->json([
-                'error' => 'Failed to send message: '.$th->getMessage(),
+                'error' => 'Failed to send message: '.$th->getMessage() . ' at ' . $th->getFile() . ':' . $th->getLine(),
             ], 500);
         }
     }
