@@ -24,7 +24,7 @@ class ConversationController extends Controller
 
         $conversation->load('messages');
 
-        return response()->json($conversation);
+        return response()->json(['conversation' => $conversation]);
     }
 
     public function store(Request $request)
