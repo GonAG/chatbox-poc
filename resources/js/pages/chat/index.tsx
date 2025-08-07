@@ -64,8 +64,6 @@ export default function ChatPage({ conversations: initialConversations }: Props)
         };
     }, [selected]);
 
-    console.log('selected', selected);
-
     const loadMessages = (conversation: Conversation) => {
         setSelected(conversation);
         api.get(`/api/conversations/${conversation.id}`).then((r) => {
@@ -92,7 +90,7 @@ export default function ChatPage({ conversations: initialConversations }: Props)
         api
             .post(`/api/conversations/${selected.id}/messages`, form)
             .then((r) => {
-                setMessages((m) => [...m, r.data]);
+                setMessages((m) => [...m, r.data.message]);
                 setContent('');
                 setAttachment(null);
             });
